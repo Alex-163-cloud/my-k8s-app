@@ -27,9 +27,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/my-k8s-app:latest
 
+      - name: Prepare kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
       - name: Deploy to Kubernetes
         uses: actions-hub/kubectl@master
         env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          KUBE_CONFIG: ~/.kube/config
         with:
           args: apply -f deployment.yaml
